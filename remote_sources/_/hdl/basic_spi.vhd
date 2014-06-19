@@ -21,7 +21,7 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
-entity logipi_blink is
+entity basic_spi is
 port( OSC_FPGA : in std_logic;
 		PB : in std_logic_vector(1 downto 0);
 		SYS_SPI_MOSI : in std_logic;
@@ -29,9 +29,9 @@ port( OSC_FPGA : in std_logic;
 		SYS_SPI_MISO: out std_logic;
 		LED : out std_logic_vector(1 downto 0)
 );
-end logipi_blink;
+end basic_spi;
 
-architecture Behavioral of logipi_blink is
+architecture Behavioral of basic_spi is
 	
 	signal spi_value: std_logic_vector(7 downto 0);
 	--signal spi_counter: std_logic_vector(2 downto 0);
