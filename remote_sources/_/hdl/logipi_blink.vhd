@@ -33,8 +33,6 @@ end logipi_blink;
 
 architecture Behavioral of logipi_blink is
 	
-	-- Led counter
-	signal counter_output : std_logic_vector(31 downto 0);
 	signal spi_value: std_logic_vector(7 downto 0);
 	--signal spi_counter: std_logic_vector(2 downto 0);
 	signal spi_readvalue: std_logic_vector(7 downto 0);
@@ -42,6 +40,8 @@ architecture Behavioral of logipi_blink is
 	signal pb0_synchronizer: std_logic_vector(2 downto 0);
 	
 begin
+	
+	blink_hb : entity work.blink_heartbeat port map(CLK => OSC_FPGA, LED => LED(0));
 	
 	process(OSC_FPGA, PB)
 	begin
@@ -53,7 +53,6 @@ begin
 		
 			if pb0_synchronizer(2 downto 1) = "01" then
 				-- Rising edge is button release
-				counter_output <= X"00000000";
 				--spi_counter <= "000";
 				spi_value <= X"C5"; -- 11000101
 				spi_readvalue <= X"00";
@@ -62,8 +61,6 @@ begin
   			   --spi_value <= spi_value(6 downto 0) & '0';
 				--sck_synchronizer <= "000";
 			else
-				-- Blinky
-				counter_output <= counter_output + 1 ;
 				
 				-- Synch the SPI clock
 				sck_synchronizer(2 downto 1) <= sck_synchronizer(1 downto 0);
@@ -91,11 +88,6 @@ begin
 			end if;
 		end if;
 	end process ;
-
-
-	LED(0) <= counter_output(24);
-	
-	
 
 end Behavioral;
 
