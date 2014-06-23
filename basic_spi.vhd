@@ -18,55 +18,68 @@ end basic_spi;
 
 architecture Behavioral of basic_spi is
 	
-	signal spi_value: std_logic_vector(7 downto 0);
-	signal spi_readvalue: std_logic_vector(7 downto 0);
-	signal sck_synchronizer: std_logic_vector(2 downto 0);
 	signal pb0_synchronizer: std_logic_vector(2 downto 0);
+	signal reset:std_logic;
+	
+	signal data_in:std_logic_vector(7 downto 0);
+	signal data_out:std_logic_vector(7 downto 0);
+	signal rd:std_logic;
+	signal wr:std_logic;
 	
 begin
 	
 	blink_hb : entity work.blink_heartbeat port map(CLK => OSC_FPGA, LED => LED(0));
+--	spi_fifo: entity work.fifo GENERIC MAP (
+--			ADDR_W => 3,
+--			DATA_W => 8
+--		)
+--		PORT MAP (
+--          clk => OSC_FPGA,
+--          reset => pb0_synchronizer(1),
+--          rd_en => rd_en,
+--          wr_en => wr_en,
+--          data_in => data_in,
+--          data_out => data_out,
+--          data_count => data_count,
+--          empty => empty,
+--          full => full
+--        );		  
+	
+	spi: entity work.spi 
+		PORT MAP (
+			clk => OSC_FPGA,
+         reset => reset,
+			data_in => X"C5", -- Always output 0xC5 on the SPI interface.
+         data_out => data_out,
+         rd => rd,
+         wr => wr,
+         SCK => SYS_SPI_SCK,
+         MOSI => SYS_SPI_MOSI,
+         MISO => SYS_SPI_MISO
+	);
 	
 	process(OSC_FPGA, PB)
 	begin
 		if (rising_edge(OSC_FPGA)) then
-
-			-- Synch the SPI clock
-			sck_synchronizer(2 downto 1) <= sck_synchronizer(1 downto 0);
-			sck_synchronizer(0) <= SYS_SPI_SCK;
 		
-			-- Synch the pushbutton
+			-- Synch the pushbutton and generate a reset signal
 			pb0_synchronizer(2 downto 1) <= pb0_synchronizer(1 downto 0);
 			pb0_synchronizer(0) <= PB(0);
 		
 			if pb0_synchronizer(2 downto 1) = "01" then
 				-- Rising edge is button release
-				spi_value <= X"C5"; -- 11000101
-				spi_readvalue <= X"00";
-				SYS_SPI_MISO <= '0'; -- Mode1 means this value should never get sampled
 				LED(1) <= '0';
-				--sck_synchronizer <= "000";
-			else
-				
-		
-				-- SPI MODE 1: clock rests low, assert on rise, latch on fall.
-				if (sck_synchronizer(2 downto 1) = "01") then
-					-- rise: assert
-					spi_value <= spi_value(6 downto 0) & '0';
-					SYS_SPI_MISO <= spi_value(7);
-				else
-					if (sck_synchronizer(2 downto 1) = "10") then
-					-- fall: sample
-						spi_readvalue(7 downto 1) <= spi_readvalue(6 downto 0);
-						spi_readvalue(0) <= SYS_SPI_MOSI;
-					else
-						-- If we got a magic value, turn on the led and reset the buffer
-						if (spi_readvalue = X"AA") then
-							LED(1)<='1';
-							spi_readvalue<=X"00";
-						end if;
-					end if;
-				end if;			
+				reset <= '1';
+			elsif (reset = '1') then
+				reset <= '0';
+			end if;
+			
+			-- monitor the SPI output. If we see the magic number,
+			-- turn on the LED.
+			if (wr = '1') then
+				if (data_out = X"AA") then
+					LED(1) <= '1';
+				end if;
 			end if;
 		end if;
 	end process ;
