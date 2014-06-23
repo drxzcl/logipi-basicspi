@@ -42,32 +42,32 @@ begin
 				data_count <= (others => '0');
 				empty <= '1';
 				full <= '0';
-			end if;
-		else
-			if (wr_en = '1') then
-				-- Write into the fifo
-				if (conv_integer(data_count) /= ((2**ADDR_W))) then					
-					mem_array(conv_integer(wr_ptr)) <= data_in;
-					wr_ptr <= wr_ptr + 1;
-					data_count <= data_count + 1;
-					empty <= '0';
-					if (conv_integer(data_count) = ((2**ADDR_W) - 1)) then
-						full <= '1';
+			else
+				if (wr_en = '1') then
+					-- Write into the fifo
+					if (conv_integer(data_count) /= ((2**ADDR_W))) then					
+						mem_array(conv_integer(wr_ptr)) <= data_in;
+						wr_ptr <= wr_ptr + 1;
+						data_count <= data_count + 1;
+						empty <= '0';
+						if (conv_integer(data_count) = ((2**ADDR_W) - 1)) then
+							full <= '1';
+						end if;
 					end if;
 				end if;
-			end if;
-			if (rd_en = '1') then
-				-- Write into the fifo
-				if (conv_integer(data_count) /= 0) then
-					data_out <= mem_array(conv_integer(rd_ptr));
-					rd_ptr <= rd_ptr + 1;
-					data_count <= data_count - 1;
-					full <= '0';
-					if (conv_integer(data_count) = 1) then
-						empty <= '1';
+				if (rd_en = '1') then
+					-- Write into the fifo
+					if (conv_integer(data_count) /= 0) then
+						data_out <= mem_array(conv_integer(rd_ptr));
+						rd_ptr <= rd_ptr + 1;
+						data_count <= data_count - 1;
+						full <= '0';
+						if (conv_integer(data_count) = 1) then
+							empty <= '1';
+						end if;
+					else
+						data_out <= (others => '0');
 					end if;
-				else
-					data_out <= (others => '0');
 				end if;
 			end if;
 		end if;
