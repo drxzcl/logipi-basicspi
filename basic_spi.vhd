@@ -12,7 +12,7 @@ port( OSC_FPGA : in std_logic;
 		SYS_SPI_MOSI : in std_logic;
 		SYS_SPI_SCK : in std_logic;
 		SYS_SPI_MISO: out std_logic;
-		LED : out std_logic_vector(1 downto 0)
+		LED : out std_logic_vector(1 downto 0) := (others => '0')
 );
 end basic_spi;
 
@@ -29,27 +29,27 @@ architecture Behavioral of basic_spi is
 begin
 	
 	blink_hb : entity work.blink_heartbeat port map(CLK => OSC_FPGA, LED => LED(0));
---	spi_fifo: entity work.fifo GENERIC MAP (
---			ADDR_W => 3,
---			DATA_W => 8
---		)
---		PORT MAP (
---          clk => OSC_FPGA,
---          reset => pb0_synchronizer(1),
---          rd_en => rd_en,
---          wr_en => wr_en,
---          data_in => data_in,
---          data_out => data_out,
---          data_count => data_count,
---          empty => empty,
---          full => full
---        );		  
+	spi_fifo: entity work.fifo GENERIC MAP (
+			ADDR_W => 3,
+			DATA_W => 8
+		)
+		PORT MAP (
+          clk => OSC_FPGA,
+          reset => reset,
+          rd_en => rd,
+          wr_en => wr,
+          data_in => data_out,
+          data_out => data_in,
+          data_count => open,
+          empty => open,
+          full => open
+     );		  
 	
 	spi: entity work.spi 
 		PORT MAP (
 			clk => OSC_FPGA,
          reset => reset,
-			data_in => X"C5", -- Always output 0xC5 on the SPI interface.
+			data_in => data_in, -- Always output 0xC5 on the SPI interface.
          data_out => data_out,
          rd => rd,
          wr => wr,

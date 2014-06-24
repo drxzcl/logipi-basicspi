@@ -34,7 +34,7 @@ end blink_heartbeat;
 
 architecture Behavioral of blink_heartbeat is
 	-- Led counter
-	signal counter_output : std_logic_vector(24 downto 0);
+	signal counter_output : std_logic_vector(24 downto 0) := (others => '0');
 
 begin
 

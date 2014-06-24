@@ -34,23 +34,23 @@ entity spi is
     Port ( clk : in STD_LOGIC;
            reset : in  STD_LOGIC;
 			  data_in : in  STD_LOGIC_VECTOR (7 downto 0);
-           data_out : out  STD_LOGIC_VECTOR (7 downto 0);
-           rd : out  STD_LOGIC;
-           wr : out  STD_LOGIC;
+           data_out : out  STD_LOGIC_VECTOR (7 downto 0)  := (others => '0');
+           rd : out  STD_LOGIC := '0';
+           wr : out  STD_LOGIC := '0';
            SCK : in  STD_LOGIC;
            MOSI : in  STD_LOGIC;
-           MISO : out  STD_LOGIC);
+           MISO : out  STD_LOGIC := '0');
 end spi;
 
 architecture Behavioral of spi is
-	signal spi_value: std_logic_vector(7 downto 0);
-	signal spi_readvalue: std_logic_vector(7 downto 0);
-	signal sck_synchronizer: std_logic_vector(2 downto 0);
+	signal spi_value: std_logic_vector(7 downto 0) := (others => '0');
+	signal spi_readvalue: std_logic_vector(7 downto 0):= (others => '0');
+	signal sck_synchronizer: std_logic_vector(2 downto 0):= (others => '0');
 
-	signal rdcnt: std_logic_vector(3 downto 0);
-	signal wrcnt: std_logic_vector(2 downto 0);
-	signal feed_me: std_logic;
-	signal read_me: std_logic;
+	signal rdcnt: std_logic_vector(3 downto 0) := "1111";
+	signal wrcnt: std_logic_vector(2 downto 0) := "000";
+	signal feed_me: std_logic := '0';
+	signal read_me: std_logic := '0';
 
 begin
 process(clk, reset)
@@ -62,10 +62,10 @@ process(clk, reset)
 			sck_synchronizer(0) <= SCK;
 	
 			if (reset = '1') then
-				spi_value <= X"C5"; -- 11000101
+				spi_value <= X"00"; 
 				spi_readvalue <= X"00";
 				MISO <= '0'; -- Mode1 means this value should never get sampled
-				rdcnt <= "0000";
+				rdcnt <= "1111";
 				wrcnt <= "000";
 				rd <= '0';
 				wr <= '0';
@@ -91,7 +91,7 @@ process(clk, reset)
 						spi_readvalue(0) <= MOSI;
 						rdcnt <= rdcnt+1;
 						if (rdcnt = "1000") then
-							rdcnt <= "0000";
+							rdcnt <= "0001";
 							read_me <= '1';
 							wr <= '1';
 							data_out <= spi_readvalue;

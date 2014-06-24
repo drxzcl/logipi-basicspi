@@ -16,10 +16,10 @@ entity fifo is
 			rd_en 				: in std_logic; 		-- read enable 
 			wr_en					: in std_logic; 		-- write enable 
 			data_in 				: in std_logic_vector(DATA_W- 1 downto 0); 
-			data_out				: out std_logic_vector(DATA_W- 1 downto 0); 
-			data_count			: buffer std_logic_vector(ADDR_W downto 0);
-			empty 				: out std_logic; 
-			full					: out std_logic
+			data_out				: out std_logic_vector(DATA_W- 1 downto 0) := (others => '0'); 
+			data_count			: buffer std_logic_vector(ADDR_W downto 0) := (others => '0');
+			empty 				: out std_logic := '1'; 
+			full					: out std_logic := '0'
 );
 end fifo;
 
@@ -28,8 +28,8 @@ architecture Behavioral of fifo is
 	-----memory, pointers-------
 	type reg_file_type is array (0 to ((2**ADDR_W) - 1)) of std_logic_vector(DATA_W - 1 downto 0);
 	
-	signal mem_array					: reg_file_type ;
-	signal rd_ptr, wr_ptr 			: std_logic_vector(ADDR_W-1 downto 0); 		-- current pointers
+	signal mem_array					: reg_file_type := (others => (others => '0')) ;
+	signal rd_ptr, wr_ptr 			: std_logic_vector(ADDR_W-1 downto 0) := (others => '0'); 		-- current pointers
 begin
 
 	process(clk)
